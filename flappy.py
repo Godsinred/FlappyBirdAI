@@ -56,13 +56,14 @@ def game():
     birdX = (screenWidth * 0.2)
     birdY = (screenHeight * 0.5)
 
-    yChange = 0
+    yChange = 10
+    counter = 0
 
     pipeStartX = screenWidth
     pipeStartY = 0
     pipeSpeed = 10
     pipeWidth = 100
-    pipeHeight = 100
+    pipeHeight = 200
 
     score = 0
 
@@ -76,14 +77,19 @@ def game():
                 quit()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    yChange = -5
-                if event.key == pygame.K_DOWN:
-                    yChange = 5
+                if event.key == pygame.K_SPACE:
+                    yChange = -10
+                    counter = 10
 
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    yChange = 0
+            # if event.type == pygame.KEYUP:
+            #     if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+            #         yChange = 5
+
+
+        if counter > 0:
+            counter -= 1
+        else:
+            yChange = 10
 
         birdY += yChange
 
@@ -103,6 +109,7 @@ def game():
         if pipeStartX + pipeWidth < birdX:
             pipeStartY = 0
             pipeStartX = screenWidth
+            pipeHeight = 400 * random.random()
             score += 1
 
         if birdY < pipeStartY + pipeHeight:
