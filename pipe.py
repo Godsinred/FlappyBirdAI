@@ -1,7 +1,10 @@
 import pygame
+import random
 
 WHITE = (255,255,255)
 SCREENWIDTH = 900
+
+random.seed(100)
 
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
@@ -26,7 +29,7 @@ class Pipe(pygame.sprite.Sprite):
 
     # moves the pipe left a fixed number of pixels
     def moveLeft(self):
-        self.rect.x -= 3
+        self.rect.x -= 5
 
     # resets the pipe attributes to be drawn again later
     def reset(self):

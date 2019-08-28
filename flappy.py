@@ -12,16 +12,20 @@ GAPSIZE = 200
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
+SKYBLUE = (135,206,235)
+WHEAT = (245,222,179)
 
 PIPECOLOR = (0,128,0)
 BIRDHEIGHT = 50
 PIPEWIDTH = 100
 PIPESPEED = 10
 
+HEIGHTGROUND = 100
+
 def pipesDodged(count):
     font = pygame.font.SysFont(None, 25)
     text = font.render("Score: "+ str(count), True, BLACK)
-    gameDisplay.blit(text,(0,0))
+    screen.blit(text,(0,0))
 
 class Game():
     def __init__(self):
@@ -30,32 +34,36 @@ class Game():
 def main():
     # initializes the pygame
     pygame.init()
-    gameDisplay = pygame.display.set_mode((SCREENWIDTH,SCREENHEIGHT))
+    screen = pygame.display.set_mode((SCREENWIDTH,SCREENHEIGHT))
     pygame.display.set_caption("Flappy Bird")
     clock = pygame.time.Clock()
+    # For writing to the screen, currently score
+    FONT = pygame.font.SysFont("Sans", 20)
 
     # Drawing on Screen
-    gameDisplay.fill(WHITE)
+    screen.fill(WHITE)
 
     # creates the birds
     bird = Bird(200, 400)
 
     # creates all the pipes
+    # (x, y, width, height)
     pipe1 = Pipe(0, 0, PIPEWIDTH, 200)
     pipe2 = Pipe(0, 0, PIPEWIDTH, 200)
     pipe3 = Pipe(0, 0, PIPEWIDTH, 100)
     pipe4 = Pipe(0, 0, PIPEWIDTH, 300)
-    pipe5 = Pipe(0, 0, PIPEWIDTH, 300)
-    pipe6 = Pipe(0, 0, PIPEWIDTH, 100)
+    pipe5 = Pipe(0, 0, PIPEWIDTH, 250)
+    pipe6 = Pipe(0, 0, PIPEWIDTH, 50)
+    # Also need to calculate for the ground now
     pipe1.rect.x = SCREENWIDTH
     pipe2.rect.x = SCREENWIDTH
-    pipe2.rect.y = SCREENHEIGHT - 200
+    pipe2.rect.y = pipe1.height + GAPSIZE
     pipe3.rect.x = SCREENWIDTH * 1.5
     pipe4.rect.x = SCREENWIDTH * 1.5
-    pipe4.rect.y = SCREENHEIGHT - 300
+    pipe4.rect.y = pipe3.height + GAPSIZE
     pipe5.rect.x = SCREENWIDTH * 2
     pipe6.rect.x = SCREENWIDTH * 2
-    pipe6.rect.y = SCREENHEIGHT - 100
+    pipe6.rect.y = pipe5.height + GAPSIZE
 
     # Container for all the sprites
     allSpritesList = pygame.sprite.Group()
@@ -86,6 +94,8 @@ def main():
     gameOver = False
     clock = pygame.time.Clock()
 
+    startTime = pygame.time.get_ticks()
+
     while not gameOver:
             # eventually this needs to be until all the birds are dead
             for event in pygame.event.get():
@@ -96,15 +106,15 @@ def main():
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 bird.jump()
-            if keys[pygame.K_DOWN]:
-                bird.fall()
 
             # Will move all the birds
             for bird in allBirdList:
                 bird.move()
-                if (bird.rect.y > SCREENHEIGHT or bird.rect.y < 0):
+                if (bird.rect.y > SCREENHEIGHT - HEIGHTGROUND or bird.rect.y < 0):
                     print("Out of screen.")
+                    pygame.time.wait(3000)
                     gameOver = True
+
 
             # Moves the pipes
             for pipe in allPipesList:
@@ -122,10 +132,17 @@ def main():
             allSpritesList.update()
 
             #Drawing on Screen
-            gameDisplay.fill(WHITE)
+            screen.fill(SKYBLUE)
 
             #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
-            allSpritesList.draw(gameDisplay)
+            allSpritesList.draw(screen)
+
+            # draws the ground
+            pygame.draw.rect(screen, WHEAT, [0, SCREENHEIGHT - HEIGHTGROUND, SCREENWIDTH, HEIGHTGROUND])
+
+            curTime = pygame.time.get_ticks()
+            message = "Score: " + str(curTime - startTime)
+            screen.blit(FONT.render(message, True, BLACK), (20, 20))
 
             #Refresh Screen
             pygame.display.flip()
