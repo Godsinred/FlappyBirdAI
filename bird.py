@@ -21,15 +21,18 @@ class Bird(pygame.sprite.Sprite):
         self.rect.y = 275
 
     def jump(self):
-        self.speed = 20
+        self.speed = 30
         self.counter = 5
 
     def fall(self):
         self.rect.y += 10
 
     def move(self):
-        if counter is 0:
+        if self.counter is 0:
             self.rect.y += self.speed
             self.speed += GRAVITY
         else:
             self.rect.y -= self.speed
+            self.speed -= GRAVITY
+            if self.counter is 0:
+                self.speed = 0

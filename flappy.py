@@ -197,6 +197,9 @@ def main():
 
             for bird in allBirdList:
                 bird.move()
+                if (bird.rect.y > SCREENHEIGHT or bird.rect.y < 0):
+                    print("Out of screen.")
+                    gameOver = True
 
             # Game Logic
             for pipe in allPipesList:
