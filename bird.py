@@ -13,7 +13,6 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # The "physics" of the bird
-        self.yChange = 10
         self.counter = 0
         self.speed = 0
 
