@@ -5,7 +5,7 @@ from pipe import Pipe
 from bird import Bird
 
 # constants
-SCREENWIDTH = 800
+SCREENWIDTH = 900
 SCREENHEIGHT = 600
 
 GAPSIZE = 200
@@ -45,6 +45,7 @@ def message_display(text):
 def crash():
     message_display("Game Over")
 
+### IGNORE THIS FOR NOW, was going to put the game into a class how we discussed
 class Game():
     def __init__(self):
         pygame.init()
@@ -123,37 +124,107 @@ class Game():
 
 
 def main():
-
-    generations = 1
-    populationSize = 1
-
-    # for i in range(generations):
-    #     curGame = Game(populationSize)
-    #     curGame.start()
-
+    # initializes the pygame
     pygame.init()
     gameDisplay = pygame.display.set_mode((SCREENWIDTH,SCREENHEIGHT))
-    pygame.display.set_caption("Car Racing")
+    pygame.display.set_caption("Flappy Bird")
     clock = pygame.time.Clock()
 
-    #Drawing on Screen
-    gameDisplay.fill((20, 255, 140))
-    all_sprites_list = pygame.sprite.Group()
+    # Drawing on Screen
+    gameDisplay.fill(WHITE)
+
+    # creates the birds
     bird = Bird(200, 400)
-    all_sprites_list.add(bird)
 
-    bird.drawBird()
-    time.sleep(5)
-    bird.moveUp()
-    bird.drawBird()
+    # creates all the pipes
+    pipe1 = Pipe(0, 0, PIPEWIDTH, 200)
+    pipe2 = Pipe(0, 0, PIPEWIDTH, 200)
+    pipe3 = Pipe(0, 0, PIPEWIDTH, 100)
+    pipe4 = Pipe(0, 0, PIPEWIDTH, 300)
+    pipe5 = Pipe(0, 0, PIPEWIDTH, 300)
+    pipe6 = Pipe(0, 0, PIPEWIDTH, 100)
+    pipe1.rect.x = SCREENWIDTH
+    pipe2.rect.x = SCREENWIDTH
+    pipe2.rect.y = SCREENHEIGHT - 200
+    pipe3.rect.x = SCREENWIDTH * 1.5
+    pipe4.rect.x = SCREENWIDTH * 1.5
+    pipe4.rect.y = SCREENHEIGHT - 300
+    pipe5.rect.x = SCREENWIDTH * 2
+    pipe6.rect.x = SCREENWIDTH * 2
+    pipe6.rect.y = SCREENHEIGHT - 100
+
+    # Container for all the sprites
+    allSpritesList = pygame.sprite.Group()
+    allSpritesList.add(bird)
+    allSpritesList.add(pipe1)
+    allSpritesList.add(pipe2)
+    allSpritesList.add(pipe3)
+    allSpritesList.add(pipe4)
+    allSpritesList.add(pipe5)
+    allSpritesList.add(pipe6)
+
+    # container for all the birds
+    allBirdList = pygame.sprite.Group()
+    allBirdList.add(bird)
+
+    # container for all the pipes
+    allPipesList = pygame.sprite.Group()
+    allPipesList.add(pipe1)
+    allPipesList.add(pipe2)
+    allPipesList.add(pipe3)
+    allPipesList.add(pipe4)
+    allPipesList.add(pipe5)
+    allPipesList.add(pipe6)
 
 
-    time.sleep(5)
+
+    # Vars for determining if the game is over
+    gameOver = False
+    clock = pygame.time.Clock()
+
+    while not gameOver:
+            # eventually this needs to be until all the birds are dead
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    gameOver = True
+
+            # this will eventuyally be depricated and replaced by per bird
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                bird.jump()
+            if keys[pygame.K_DOWN]:
+                bird.fall()
+
+            for bird in allBirdList:
+                bird.move()
+
+            # Game Logic
+            for pipe in allPipesList:
+                pipe.moveLeft()
+                if pipe.rect.x + PIPEWIDTH < 0:
+                    pipe.reset()
+
+            pipeCollision = pygame.sprite.groupcollide(allPipesList, allBirdList, False, False)
+            for bird in pipeCollision:
+                print("bird collision")
+                #End Of Game
+                gameOver = True
+
+            allSpritesList.update()
+
+            #Drawing on Screen
+            gameDisplay.fill(WHITE)
+
+            #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
+            allSpritesList.draw(gameDisplay)
+
+            #Refresh Screen
+            pygame.display.flip()
+
+            #Number of frames per secong e.g. 60
+            clock.tick(60)
+
     pygame.quit()
-
-
-
-
     quit()
 
 if __name__ == "__main__":

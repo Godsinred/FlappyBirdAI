@@ -23,7 +23,7 @@ clock = pygame.time.Clock()
 carImg = pygame.image.load('assets/bird.png')
 
 #testing
-bird = Bird()
+bird = Bird(100,200)
 
 
 def things_dodged(count):
@@ -75,7 +75,8 @@ def game_loop():
     dodged = 0
 
     gameExit = False
-
+    bird.drawBird()
+    
     while not gameExit:
 
         for event in pygame.event.get():
