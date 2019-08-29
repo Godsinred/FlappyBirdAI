@@ -2,7 +2,7 @@ import pygame
 GRAVITY = 0.5
 
 class Bird(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, genomeNum):
         # initialize the parent sprite class
         super().__init__()
 
@@ -21,10 +21,11 @@ class Bird(pygame.sprite.Sprite):
 
         # will be used for the fitness of the NN
         self.score = 0
+        self.genomeNum = genomeNum
 
     def jump(self):
         # how much the bird will move when told to jump
-        self.speed = 8
+        self.speed = 10
         self.counter = 4
 
     def move(self):
@@ -38,3 +39,7 @@ class Bird(pygame.sprite.Sprite):
             self.counter -= 1
             if self.counter is 0:
                 self.speed = 0
+
+    def removeBird(self, score):
+        self.score = score
+        self.kill()

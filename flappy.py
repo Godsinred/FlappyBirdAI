@@ -18,7 +18,6 @@ WHEAT = (245,222,179)
 PIPECOLOR = (0,128,0)
 BIRDHEIGHT = 50
 PIPEWIDTH = 100
-PIPESPEED = 10
 
 HEIGHTGROUND = 100
 
@@ -42,6 +41,7 @@ class Game():
         # container for all the pipes
         self.allPipesList = pygame.sprite.Group()
 
+        # list of all birds for analysis after the pygame exits
         self.bird = []
 
         # This is for the NN calculations for determining how far the next pipe is
@@ -56,16 +56,15 @@ class Game():
         self.createPipes()
 
         # Vars for determining if the game is over
-        self.gameOver = False
         self.clock = pygame.time.Clock()
-
         self.startTime = pygame.time.get_ticks()
+        self.rand = random.Random(100)
 
     def createBirds(self, populationSize):
         # for the designated population size we will create that many birds and
         # add them to the allBirdList and allSpritesList
         for i in range(populationSize):
-            bird = Bird(200, 400)
+            bird = Bird(200, 400, i)
             self.allBirdList.add(bird)
             self.allSpritesList.add(bird)
             self.bird.append(bird)
@@ -73,12 +72,12 @@ class Game():
     def createPipes(self):
         # creates all the pipes
         # (x, y, width, height)
-        pipe1 = Pipe(0, 0, PIPEWIDTH, 200)
-        pipe2 = Pipe(0, 0, PIPEWIDTH, 200)
-        pipe3 = Pipe(0, 0, PIPEWIDTH, 100)
-        pipe4 = Pipe(0, 0, PIPEWIDTH, 300)
-        pipe5 = Pipe(0, 0, PIPEWIDTH, 250)
-        pipe6 = Pipe(0, 0, PIPEWIDTH, 50)
+        pipe1 = Pipe(0, 0, PIPEWIDTH, 200, 0)
+        pipe2 = Pipe(0, 0, PIPEWIDTH, 200, 1)
+        pipe3 = Pipe(0, 0, PIPEWIDTH, 100, 2)
+        pipe4 = Pipe(0, 0, PIPEWIDTH, 300, 3)
+        pipe5 = Pipe(0, 0, PIPEWIDTH, 250, 4)
+        pipe6 = Pipe(0, 0, PIPEWIDTH, 50, 5)
         # Also need to calculate for the ground now
         pipe1.rect.x = SCREENWIDTH
         pipe2.rect.x = SCREENWIDTH
@@ -109,48 +108,49 @@ class Game():
         # try and pass through
         self.pipes = [pipe1, pipe2, pipe3, pipe4, pipe5, pipe6]
 
-
 def main():
 
-    populationSize = 1
+    populationSize = 10
     generations = 1
 
     for i in range(generations):
+        messageGeneration = "Gen: " + str(i + 1)
+        print(messageGeneration)
         game = Game(populationSize)
 
-        while not game.gameOver:
+        while game.allBirdList:
                 # eventually this needs to be until all the birds are dead
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        game.gameOver = True
+                        pygame.quit()
 
                 # this will eventuyally be depricated and replaced by per bird
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_SPACE]:
                     # hard coded for now but this will change with the NN
                     game.bird[0].jump()
+                    game.bird[4].jump()
 
                 # Will move all the birds
                 for bird in game.allBirdList:
                     bird.move()
                     if (bird.rect.y > SCREENHEIGHT - HEIGHTGROUND or bird.rect.y < 0):
-                        print("Out of screen.")
-                        pygame.time.wait(3000)
-                        game.gameOver = True
+                        print("Out of screen for genome: " + str(bird.genomeNum))
+                        bird.removeBird(pygame.time.get_ticks() - game.startTime)
 
-
-                # Moves the pipes
+                # Moves the pipes and determines if we need to move it to the end of the screen
+                # num is a random number for determine the pipe heights (SEEDED)
+                num = game.rand.randrange(100, SCREENHEIGHT - HEIGHTGROUND - GAPSIZE - 100)
                 for pipe in game.allPipesList:
                     pipe.moveLeft()
                     if pipe.rect.x + PIPEWIDTH < 0:
-                        pipe.reset()
+                        pipe.reset(num)
 
                 # Collision detection area
-                pipeCollision = pygame.sprite.groupcollide(game.allPipesList, game.allBirdList, False, False)
+                pipeCollision = pygame.sprite.groupcollide(game.allBirdList, game.allPipesList, False, False)
                 for bird in pipeCollision:
-                    print("bird collision")
-                    #End Of Game
-                    game.gameOver = True
+                    print("bird collision for genome: " + str(bird.genomeNum))
+                    bird.removeBird(pygame.time.get_ticks() - game.startTime)
 
                 game.allSpritesList.update()
 
@@ -166,10 +166,9 @@ def main():
                 curTime = pygame.time.get_ticks()
                 messageScore = "Score: " + str(curTime - game.startTime)
                 game.screen.blit(game.FONT.render(messageScore, True, BLACK), (20, 20))
-                messageGeneration = "Gen: " + str(i + 1)
                 game.screen.blit(game.FONT.render(messageGeneration, True, BLACK), (SCREENWIDTH - 100, 20))
 
-                #Refresh Screen
+                # Refresh Screen
                 pygame.display.flip()
 
                 #Number of frames per secong e.g. 60
@@ -177,7 +176,14 @@ def main():
 
         # Exits
         pygame.quit()
+        for i in range(populationSize):
+            print("Score for genome: " + str(game.bird[i].score))
+        del game
 
+        print("sleep 2 <eye break for human>")
+        time.sleep(2)
+
+    print("\nEnd of Program.")
     quit()
 
 if __name__ == "__main__":
